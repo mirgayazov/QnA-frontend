@@ -14,7 +14,7 @@ const Control = (props) => {
   return (
     <div className='control'>
       <input id='msg' placeholder='введите сообщение' />
-      <button onClick={props.sendMsg}>отправить</button>
+      <button onClick={props.sendMsg}><img src="https://img.icons8.com/material-outlined/24/000000/upload-mail.png" /></button>
     </div>
   )
 }
@@ -34,50 +34,17 @@ const Chat = () => {
     id: 1,
     text: 'Здравствуйте, я могу ответить на ваши вопросы!',
     author: BOT,
-  },
-  {
-    id: 1,
-    text: 'Здравствуйте, я могу ответить на ваши вопросы!',
-    author: BOT,
-  }
-  ,
-  {
-    id: 1,
-    text: 'Здравствуйте, я могу ответить на ваши вопросы!',
-    author: BOT,
-  }
-  ,
-  {
-    id: 1,
-    text: 'Здравствуйте, я могу ответить на ваши вопросы!',
-    author: BOT,
-  }
-  ,
-  {
-    id: 1,
-    text: 'Здравствуйте, я могу ответить на ваши вопросы!',
-    author: BOT,
-  }
-  ,
-  {
-    id: 1,
-    text: 'Здравствуйте, я могу ответить на ваши вопросы!',
-    author: USER,
-  }
-  ,
-  {
-    id: 1,
-    text: 'Здравствуйте, я могу ответить на ваши вопросы!',
-    author: BOT,
-  }
-])
+  }])
 
   let translate = (text, language) => {
     return SERVICE.translate(text, language);
   }
 
   let saveMsg = msg => {
-    setMessages([...messages, msg]);
+    let div = document.getElementsByClassName('App');
+    div.scrollTop = 9999;
+    messages.push(msg)
+    setMessages([...messages]);
   }
 
   let newMsg = (input, author) => {
@@ -121,11 +88,11 @@ const Chat = () => {
   }
 
   return (
-    <div className='content'>
-      <div className="App">
+    <div className='content' style={{ overflow: 'hidden' }}>
+      <div className="App" style={{ overflowY: 'scroll' }}>
         {messages.map(msg => <Message text={msg.text} author={msg.author} />)}
-        <Control sendMsg={sendMsg} />
       </div>
+      <Control sendMsg={sendMsg} />
     </div>
   );
 }
