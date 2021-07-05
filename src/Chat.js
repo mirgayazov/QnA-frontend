@@ -30,19 +30,20 @@ const Message = (props) => {
 }
 
 const Chat = () => {
-  let [messages, setMessages] = useState([{
+  let [language, setLanguage] = useState('')
+  let greeting = {
     id: 1,
-    text: 'Здравствуйте, я могу ответить на ваши вопросы!',
+    textRU: 'Здравствуйте, я могу ответить на ваши вопросы!',
+    textEN: 'Hello, I can answer your questions!',
     author: BOT,
-  }])
+  }
+  let [messages, setMessages] = useState([])
 
   let translate = (text, language) => {
     return SERVICE.translate(text, language);
   }
 
   let saveMsg = msg => {
-    let div = document.getElementsByClassName('App');
-    div.scrollTop = 9999;
     messages.push(msg)
     setMessages([...messages]);
   }
@@ -63,20 +64,31 @@ const Chat = () => {
   }
 
   let findAnswer = question => {
-    translate(question, EN)
-      .then(result => {
-        axios.get(`http://127.0.0.1:5000/?question=${result[0]}`)
-          .then(response => {
-            translate(response.data, RU)
-              .then(result => {
-                let ans = newMsg(result[0], BOT);
-                saveMsg(ans);
-              })
-          })
-          .catch(error => {
-            console.log(error);
-          })
-      })
+    if (language === RU) {
+      translate(question, EN)
+        .then(result => {
+          axios.get(`http://127.0.0.1:5000/?question=${result[0]}`)
+            .then(response => {
+              translate(response.data, RU)
+                .then(result => {
+                  let ans = newMsg(result[0], BOT);
+                  saveMsg(ans);
+                })
+            })
+            .catch(error => {
+              console.log(error);
+            })
+        })
+    } else {
+      axios.get(`http://127.0.0.1:5000/?question=${question}`)
+        .then(response => {
+          let ans = newMsg(response.data, BOT);
+          saveMsg(ans);
+        })
+        .catch(error => {
+          console.log(error);
+        })
+    }
   }
 
   let sendMsg = () => {
@@ -89,10 +101,36 @@ const Chat = () => {
 
   return (
     <div className='content' style={{ overflow: 'hidden' }}>
-      <div className="App" style={{ overflowY: 'scroll' }}>
-        {messages.map(msg => <Message text={msg.text} author={msg.author} />)}
-      </div>
-      <Control sendMsg={sendMsg} />
+      {language === RU ?
+        <><div className="App" style={{ overflowY: 'scroll' }}>
+          <Message text={language === EN ? greeting.textEN : greeting.textRU} author={greeting.author} />
+          {messages.map(msg => <Message text={msg.text} author={msg.author} />)}
+        </div>
+          <Control sendMsg={sendMsg} />
+        </>
+        : <></>
+      }
+
+      {language === EN ?
+        <><div className="App" style={{ overflowY: 'scroll' }}>
+          <Message text={language === EN ? greeting.textEN : greeting.textRU} author={greeting.author} />
+          {messages.map(msg => <Message text={msg.text} author={msg.author} />)}
+        </div>
+          <Control sendMsg={sendMsg} />
+        </>
+        : <></>
+      }
+
+      {language === '' ?
+        <div className='langSelectDiv'>
+          <p>Choose language | Выберите язык</p>
+          <button className='langSelectBtn' onClick={() => setLanguage(EN)}>EN</button>
+          <button className='langSelectBtn' onClick={() => setLanguage(RU)}>RU</button>
+        </div> : <></>
+      }
+
+
+      {/* <Control sendMsg={sendMsg} /> */}
     </div>
   );
 }
