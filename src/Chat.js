@@ -2,25 +2,25 @@ import './App.css';
 import React, { useState } from 'react';
 const axios = require('axios');
 const { Translate } = require('@google-cloud/translate').v2;
-const PROJECTID = 'trans-315811';
+const PROJECTID = '<your project id>';
 const SERVICE = new Translate({ PROJECTID });
-SERVICE.key = 'AIzaSyB7d1S7QIn7L01wMzwxWi7PhS5Z3FroXb0'
-const RU = 'ru'
-const EN = 'en'
+SERVICE.key = '<your service key>';
+const RU = 'ru';
+const EN = 'en';
 const USER = 'user';
 const BOT = 'bot';
 
 const Control = (props) => {
   return (
     <div className='control'>
-      <input id='msg' placeholder='введите сообщение' />
+      <input id='msg' placeholder={props.lang === RU ? 'введите сообщение...' : 'enter your message...'} />
       <button onClick={props.sendMsg}><img src="https://img.icons8.com/material-outlined/24/000000/upload-mail.png" /></button>
     </div>
   )
 }
 
 const Message = (props) => {
-  let align = null
+  let align = null;
   props.author === BOT ? align = 'left' : align = 'right'
   return (
     <div className={'Message ' + align} >
@@ -30,23 +30,23 @@ const Message = (props) => {
 }
 
 const Chat = () => {
-  let [language, setLanguage] = useState('')
+  let [language, setLanguage] = useState('');
   let greeting = {
     id: 1,
     textRU: 'Здравствуйте, я могу ответить на ваши вопросы!',
     textEN: 'Hello, I can answer your questions!',
     author: BOT,
-  }
-  let [messages, setMessages] = useState([])
+  };
+  let [messages, setMessages] = useState([]);
 
   let translate = (text, language) => {
     return SERVICE.translate(text, language);
-  }
+  };
 
   let saveMsg = msg => {
     messages.push(msg)
     setMessages([...messages]);
-  }
+  };
 
   let newMsg = (input, author) => {
     switch (author) {
@@ -61,7 +61,7 @@ const Chat = () => {
 
   let clearInput = (input) => {
     input.value = '';
-  }
+  };
 
   let findAnswer = question => {
     if (language === RU) {
@@ -71,7 +71,7 @@ const Chat = () => {
             .then(response => {
               translate(response.data, RU)
                 .then(result => {
-                  let ans = newMsg(result[0], BOT);
+                  let ans = newMsg(result[0].charAt(0).toUpperCase() + result[0].slice(1), BOT);
                   saveMsg(ans);
                 })
             })
@@ -82,14 +82,14 @@ const Chat = () => {
     } else {
       axios.get(`http://127.0.0.1:5000/?question=${question}`)
         .then(response => {
-          let ans = newMsg(response.data, BOT);
+          let ans = newMsg(response.data.charAt(0).toUpperCase() + response.data.slice(1), BOT);
           saveMsg(ans);
         })
         .catch(error => {
           console.log(error);
         })
     }
-  }
+  };
 
   let sendMsg = () => {
     let input = document.getElementById('msg');
@@ -106,7 +106,7 @@ const Chat = () => {
           <Message text={language === EN ? greeting.textEN : greeting.textRU} author={greeting.author} />
           {messages.map(msg => <Message text={msg.text} author={msg.author} />)}
         </div>
-          <Control sendMsg={sendMsg} />
+          <Control sendMsg={sendMsg} lang={language} />
         </>
         : <></>
       }
@@ -116,7 +116,7 @@ const Chat = () => {
           <Message text={language === EN ? greeting.textEN : greeting.textRU} author={greeting.author} />
           {messages.map(msg => <Message text={msg.text} author={msg.author} />)}
         </div>
-          <Control sendMsg={sendMsg} />
+          <Control sendMsg={sendMsg} lang={language} />
         </>
         : <></>
       }
@@ -129,8 +129,6 @@ const Chat = () => {
         </div> : <></>
       }
 
-
-      {/* <Control sendMsg={sendMsg} /> */}
     </div>
   );
 }
